@@ -1,0 +1,52 @@
+<%- include('../partials/head', {title: pelicula.title}) %>
+<body>
+  <div class="container container-custom">
+    <h1 class="mb-4">Tellma</h1>
+    <div class="row">
+      <div class="col-md-4 mb-4">
+        <div class="card movie-card shadow">
+          <img src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" class="card-img-top" alt="Tellma">
+          <div class="card-body">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="sinVer">
+              <label class="form-check-label" for="sinVer">Sin ver</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-8 d-flex flex-column justify-content-between">
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi.
+        </p>
+        <div>
+          <button class="btn btn-custom mb-3" data-bs-toggle="modal" data-bs-target="#trailerModal">Trailer</button>
+          <div>
+            <a href="/" class="me-3 text-decoration-none">Atrás</a>
+            <a href="/pelicula/editar?id=1" class="text-decoration-none">Editar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal del trailer -->
+  <div class="modal fade" id="trailerModal" tabindex="-1" aria-labelledby="trailerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="trailerModalLabel">Trailer de Tellma</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body p-0">
+          <div class="ratio ratio-16x9">
+            <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Trailer" allowfullscreen></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+<%- include('../partials/footer') %>

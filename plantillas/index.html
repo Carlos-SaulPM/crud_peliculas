@@ -1,0 +1,254 @@
+<html lang="es">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Lista de Películas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet" />
+  <style>
+    html,
+    body {
+      height: 100%;
+      font-family: "Arial", sans-serif;
+      background: url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba") no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(3px);
+      z-index: -1;
+    }
+
+    .main-wrapper {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 0;
+      box-sizing: border-box;
+    }
+
+    .container-custom {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 10px;
+      padding: 20px;
+      width: 80%;
+      margin: auto;
+      flex: 1;
+    }
+
+    .card {
+      border: none;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s;
+      width: 300px;
+      height: 480px;
+      margin: 10px;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card img {
+      height: 360px;
+      width: 100%;
+      object-fit: cover;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .card-body {
+      height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .btn-custom {
+      background-color: #343a40;
+      color: #fff;
+      border-radius: 50px;
+      padding: 10px 20px;
+    }
+
+    .btn-custom:hover {
+      background-color: #495057;
+      color: #fff;
+    }
+
+    .movies-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .gap-horizontal-70 {
+      column-gap: 70px;
+    }
+
+    .movie-card {
+      width: 300px;
+      height: 500px;
+    }
+
+    .movie-card img {
+      height: 360px;
+    }
+
+    @media (max-width: 768px) {
+      .container-custom {
+        width: 95%;
+        padding: 15px;
+      }
+
+      .card {
+        width: 100% !important;
+        height: auto;
+        margin-bottom: 20px;
+      }
+
+      .card img {
+        height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-wrapper">
+    <div class="container-custom">
+      <h1 class="text-center mb-4">Lista de Películas</h1>
+      <div class="row mb-4">
+        <div class="col-md-8 offset-md-2">
+          <form action="/" method="get">
+            <div class="input-group">
+              <input name="buscar" class="form-control" placeholder="Buscar..." type="text" />
+              <button class="btn btn-outline-secondary" type="submit">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="row mb-4">
+        <div class="col-md-8 offset-md-2 d-flex align-items-center">
+          <a href="?estado=sin_ver" class="text-decoration-none me-3">
+            <div class="form-check">
+              <input class="form-check-input" id="unwatched" type="checkbox" />
+              <label class="form-check-label" for="unwatched">Sin ver</label>
+            </div>
+          </a>
+          <a href="/pelicula/agregar" class="btn btn-custom">Nueva película</a>
+        </div>
+      </div>
+
+      <div class="row justify-content-center g-4">
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+        <div class="col-auto">
+          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
+            <img alt="Imagen de la película" class="card-img-top"
+              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+            <div class="card-body text-center">
+              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+            </div>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

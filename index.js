@@ -1,0 +1,24 @@
+
+const express = require("express");
+require("dotenv").config();
+const app = express();
+
+const PORT = process.env.PORT;
+
+const path = require("path");
+const morgan = require("morgan");
+const bodyparser = require("body-parser");
+
+app.use(express.static(path.join(__dirname, "public")));
+app.set("view engine", "ejs");
+app.use(morgan("tiny"));
+app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyparser.json());
+
+app.get("/", (req,res) => {
+  res.render("index");
+})
+
+app.listen(PORT, () => {
+  console.log(`http://localhost:${PORT}`);
+});
