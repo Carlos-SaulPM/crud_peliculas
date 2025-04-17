@@ -9,6 +9,8 @@ const path = require("path");
 const morgan = require("morgan");
 const bodyparser = require("body-parser");
 
+const {peliculaApiRouter} = require("./routers");
+
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
 app.use(morgan("tiny"));
@@ -18,6 +20,8 @@ app.use(bodyparser.json());
 app.get("/", (req,res) => {
   res.render("index");
 })
+
+app.use("/api", peliculaApiRouter);
 
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
