@@ -6,7 +6,7 @@ USE dbPeliculas;
  
 CREATE TABLE pelicula(
 id_pelicula     INT NOT NULL AUTO_INCREMENT,
-titulo          VARCHAR(100) NOT NULL,
+titulo          VARCHAR(100) NOT NULL UNIQUE,
 sinopsis        VARCHAR(150) NOT NULL,
 activo          BOOLEAN DEFAULT TRUE,
 PRIMARY KEY(id_pelicula)
@@ -15,7 +15,7 @@ PRIMARY KEY(id_pelicula)
 CREATE TABLE imagen_pelicula(
 id_imagen     INT NOT NULL AUTO_INCREMENT,
 id_pelicula   INT NOT NULL,
-url_imagen    VARCHAR(150) NOT NULL,
+url_imagen    VARCHAR(150) NOT NULL UNIQUE,
 fecha         DATE DEFAULT CURRENT_DATE(),
 hora          TIME DEFAULT CURRENT_TIME(),
 PRIMARY KEY(id_imagen),
@@ -25,7 +25,7 @@ CONSTRAINT fk_imagen_pelicula_pelicula FOREIGN KEY(id_pelicula) REFERENCES pelic
 CREATE TABLE trailer_pelicula(
 id_trailer    INT NOT NULL AUTO_INCREMENT,
 id_pelicula   INT NOT NULL,
-url_trailer   VARCHAR(150) NOT NULL,
+url_trailer   VARCHAR(150) NOT NULL UNIQUE,
 fecha         DATE DEFAULT CURRENT_DATE(),
 hora          TIME DEFAULT CURRENT_TIME(),
 PRIMARY KEY(id_trailer),

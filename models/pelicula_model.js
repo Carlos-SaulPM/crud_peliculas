@@ -28,11 +28,14 @@ class PeliculaModel {
     url_trailer
   ) {
     if (
-      typeof id_pelicula !== "number" ||
-      typeof id_imagen !== "number" ||
-      typeof id_trailer !== "number"
+      id_pelicula &&
+      id_imagen &&
+      id_trailer &&
+      (typeof id_pelicula !== "number" ||
+        typeof id_imagen !== "number" ||
+        typeof id_trailer !== "number")
     )
-      throw new Error("Parametros id no son numberos");
+      throw new Error("Parametros id no son numeros");
     this.#id_pelicula = id_pelicula;
     this.#titulo = titulo;
     this.#sinopsis = sinopsis;
@@ -82,9 +85,9 @@ class PeliculaModel {
     id_trailer,
     url_trailer
   ) {
-    id_pelicula = this.#validarEntero(id_pelicula);
-    id_imagen = this.#validarEntero(id_imagen);
-    id_trailer = this.#validarEntero(id_trailer);
+    id_pelicula = this.#validarEntero(id_pelicula, "id_pelicula");
+    id_imagen = this.#validarEntero(id_imagen, "id_imagen");
+    id_trailer = this.#validarEntero(id_trailer, "id_trailer");
     return new PeliculaModel(
       id_pelicula,
       titulo,

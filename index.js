@@ -25,6 +25,16 @@ app.get("/", (req, res) => {
 
 app.use("/api", peliculaApiRouter);
 
+app.use((error, req, res, next) => {
+  console.error("MIDDLEWARE ERROR:",error);
+ res.status(error.status).json({
+   error: {
+     mensaje: error.message,
+     status: error.status,
+   },
+ });
+})
+
 app.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
 });
