@@ -120,7 +120,17 @@ router.get("/pelicula/:id", async (req, res, next) => {
 });
 
 router.get("/peliculas", async (req, res, next) => {
-  
+  let pagina = 1;
+  let limite=10
+  let offset = Number((pagina - 1) * limite);
+  const configuracion = {
+    limite,
+    offset
+  }
+  const respuesta = await peliculaRepository.obtenerPeliculas(configuracion);
+  if (!respuesta.success) next(respuesta.error);
+
+  res.status(200).json({peliculas: respuesta.result})
 });
 
 module.exports = router;

@@ -174,6 +174,32 @@ class PeliculaEntity {
     let query = "Update pelicula SET activo = ? WHERE id_pelicula = ?";
     const [result] = pool.query(query, [false, pelicula.getIdPelicula]);
   }
+
+  /**
+   * 
+   * @param {{offset: Number, pagina: Number}} configuracion 
+   * @returns {{success: Boolean, result: []}}
+   */
+  static async obtenerPeliculas(configuracion) {
+      console.log("CONFIGURACION: ", configuracion);
+      let query = "CALL sp_obtener_peliculas(?,?)";
+      const [[peliculas]] = await pool.query(query, [configuracion.limite, configuracion.offset]);
+      if (!peliculas) {
+        const error = new Error("No se pudo recuperar las peliculas")
+        error.status = 404;
+        return {
+          success: false,
+          error
+        }
+      }
+      console.log(peliculas);
+      return {
+        success: true,
+        result: peliculas
+      }
+      
+    
+  }
 }
 
 module.exports = PeliculaEntity;
