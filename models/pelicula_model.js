@@ -5,6 +5,7 @@ class PeliculaModel {
   #sinopsis;
   #id_imagen;
   #url_imagen;
+  #mimetype
   #id_trailer;
   #url_trailer;
 
@@ -24,6 +25,7 @@ class PeliculaModel {
     sinopsis,
     id_imagen,
     url_imagen,
+    mimetype,
     id_trailer,
     url_trailer
   ) {
@@ -41,6 +43,7 @@ class PeliculaModel {
     this.#sinopsis = sinopsis;
     this.#id_imagen = id_imagen;
     this.#url_imagen = url_imagen;
+    this.#mimetype = mimetype;
     this.#id_trailer = id_trailer;
     this.#url_trailer = url_trailer;
   }
@@ -53,13 +56,14 @@ class PeliculaModel {
    * @param {String} url_trailer
    * @returns {PeliculaModel}
    */
-  static peliculaParaGuardar(titulo, sinopsis, url_imagen, url_trailer) {
+  static peliculaParaGuardar(titulo, sinopsis, url_imagen, mimetype, url_trailer) {
     return new PeliculaModel(
       null,
       titulo,
       sinopsis,
       null,
       url_imagen,
+      mimetype,
       null,
       url_trailer
     );
@@ -82,6 +86,7 @@ class PeliculaModel {
     sinopsis,
     id_imagen,
     url_imagen,
+    mimetype,
     id_trailer,
     url_trailer
   ) {
@@ -94,6 +99,7 @@ class PeliculaModel {
       sinopsis,
       id_imagen,
       url_imagen,
+      mimetype,
       id_trailer,
       url_trailer
     );
@@ -143,6 +149,10 @@ class PeliculaModel {
 
   get getUrlImagen() {
     return this.#url_imagen;
+  }
+
+  get getMimetype() {
+    return this.#mimetype;
   }
 
   get getIdTrailer() {

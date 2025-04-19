@@ -19,6 +19,7 @@ CREATE TABLE imagen_pelicula (
     id_imagen INT NOT NULL AUTO_INCREMENT,
     id_pelicula INT NOT NULL,
     url_imagen VARCHAR(150) NOT NULL UNIQUE,
+    mimetype VARCHAR(30) NOT NULL,
     fecha DATE DEFAULT CURRENT_DATE(),
     hora TIME DEFAULT CURRENT_TIME(),
     PRIMARY KEY (id_imagen),
@@ -41,6 +42,7 @@ CREATE PROCEDURE sp_insertar_pelicula(
     IN p_titulo VARCHAR(100),
     IN p_sinopsis VARCHAR(150),
     IN p_url_imagen VARCHAR(150),
+    IN p_mimetype VARCHAR(30),
     IN p_url_trailer VARCHAR(150)
 )
 BEGIN
@@ -50,8 +52,8 @@ BEGIN
     VALUES(p_titulo, p_sinopsis);
     SET v_id_pelicula = LAST_INSERT_ID();
 
-    INSERT INTO imagen_pelicula(id_pelicula, url_imagen)
-    VALUES (v_id_pelicula, p_url_imagen);
+    INSERT INTO imagen_pelicula(id_pelicula, url_imagen, mimetype)
+    VALUES (v_id_pelicula, p_url_imagen, p_mimetype);
 
     INSERT INTO trailer_pelicula(id_pelicula, url_trailer)
     VALUES(v_id_pelicula, p_url_trailer);
@@ -67,6 +69,7 @@ BEGIN
         p.sinopsis,
         ip.id_imagen,
         ip.url_imagen,
+        ip.mimetype,
         tp.id_trailer,
         tp.url_trailer
     FROM pelicula p
@@ -86,13 +89,31 @@ BEGIN
     p.sinopsis,
     ip.id_imagen,
     ip.url_imagen,
+    ip.mimetype,
     tp.id_trailer,
     tp.url_trailer
   FROM pelicula p
-  INNER JOIN imagen_pelicula ip ON p.id_pelicula = ip.id_pelicula
-  INNER JOIN trailer_pelicula tp ON p.id_pelicula = tp.id_pelicula
-  WHERE
-    p.activo = TRUE
+  INNER JOIN (
+    SELECT ip1.*
+    FROM imagen_pelicula ip1
+    INNER JOIN (
+      SELECT id_pelicula, MAX(CONCAT(fecha, ' ', hora)) AS max_fecha
+      FROM imagen_pelicula
+      GROUP BY id_pelicula
+    ) ultima_ip ON ip1.id_pelicula = ultima_ip.id_pelicula
+               AND CONCAT(ip1.fecha, ' ', ip1.hora) = ultima_ip.max_fecha
+  ) ip ON p.id_pelicula = ip.id_pelicula
+  INNER JOIN (
+    SELECT tp1.*
+    FROM trailer_pelicula tp1
+    INNER JOIN (
+      SELECT id_pelicula, MAX(CONCAT(fecha, ' ', hora)) AS max_fecha
+      FROM trailer_pelicula
+      GROUP BY id_pelicula
+    ) ultimo_tp ON tp1.id_pelicula = ultimo_tp.id_pelicula
+                AND CONCAT(tp1.fecha, ' ', tp1.hora) = ultimo_tp.max_fecha
+  ) tp ON p.id_pelicula = tp.id_pelicula
+  WHERE p.activo = TRUE
   LIMIT p_limit OFFSET p_offset;
 END//
 

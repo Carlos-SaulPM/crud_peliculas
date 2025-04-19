@@ -5,19 +5,23 @@ class PeliculaEntity {
   /**
    *
    * @param {PeliculaModel} pelicula
-   * @returns {{success: Boolean, result: QueryResult, pelicula: PeliculaModel}}
+   * @returns {{success: Boolean, pelicula: PeliculaModel}}
    */
 
   static async subirPelicula(pelicula) {
-    const query = "call sp_insertar_pelicula(?,?,?,?);";
+    const query = "call sp_insertar_pelicula(?,?,?,?,?);";
     try {
       const [result] = await pool.query(query, [
         pelicula.getTitulo,
         pelicula.getSinopsis,
         pelicula.getUrlImagen,
+        pelicula.getMimetype,
         pelicula.getUrlTrailer,
       ]);
-      if (result.affectedRows <= 0) return { success: false };
+
+      if (result.affectedRows <= 0) {
+        throw new Error("No se pudo subir la pelicula");
+      }
       return { success: true, result, pelicula };
     } catch (error) {
       console.error("Error en subirPelicula:", error);
@@ -27,31 +31,30 @@ class PeliculaEntity {
 
   /**
    * @param {PeliculaModel} pelicula
-   * @returns {{success: Boolean, result:QueryResult, peliculaDb: PeliculaModel}}
+   * @returns {{success: Boolean, peliculaDb: PeliculaModel}}
    */
 
   static async obtenerPelicula(pelicula) {
     try {
       let query = "call sp_obtener_pelicula(?);";
       const [result] = await pool.query(query, [pelicula.getIdPelicula]);
-
-      if (!result.length) {
-        throw new Error("No se pudo obtener la pelicula");
+      if (!result[0].length) {
+        throw new Error("No se encontro la pelicula");
       }
       let peliculaDb = result[0][0];
-
       peliculaDb = peliculaModel.peliculaParaObtener(
         pelicula.getIdPelicula,
         peliculaDb.titulo,
         peliculaDb.sinopsis,
         peliculaDb.id_imagen,
         peliculaDb.url_imagen,
+        peliculaDb.getMimetype,
         peliculaDb.id_trailer,
         peliculaDb.url_trailer
       );
-      return { success: true, result, peliculaDb };
+      return { success: true, peliculaDb };
     } catch (error) {
-      console.error("Error en obtenerPelicula:", error);
+      console.error("Repository obtenerPelicula:", error);
       return { success: false, error };
     }
   }
@@ -63,18 +66,20 @@ class PeliculaEntity {
    */
 
   static async modificarPelicula(pelicula) {
-
     let peliculaEncontrada = await this.obtenerPelicula(pelicula);
-    if (!peliculaEncontrada.success) {
-      peliculaEncontrada.error.status = 400;
-      throw peliculaEncontrada.error;
-    }
+    if (!peliculaEncontrada.success) throw peliculaEncontrada.error;
 
     peliculaEncontrada = peliculaEncontrada.peliculaDb;
-    if (!peliculaEncontrada || Object.values(peliculaEncontrada.toJSON()).length <= 1)
-      throw new Error(
+    if (
+      !peliculaEncontrada ||
+      Object.values(peliculaEncontrada.toJSON()).length <= 1
+    ) {
+      const error = new Error(
         `La película con id ${pelicula.getIdPelicula} no se encuentra en la DB y no se puede modificar`
       );
+      error.status(404);
+      throw error;
+    }
 
     const valoresNuevos = pelicula.toJSON();
     const valoresViejos = peliculaEncontrada.toJSON();
@@ -84,6 +89,7 @@ class PeliculaEntity {
       "sinopsis",
       "url_imagen",
       "url_trailer",
+      "mimetype",
     ];
     const propiedadesACambiar = [];
     const detallesDeCambio = [];
@@ -131,8 +137,8 @@ class PeliculaEntity {
 
     if (propiedadesACambiar.includes("url_imagen")) {
       queries.push({
-        sql: `INSERT INTO imagen_pelicula (id_pelicula, url_imagen) VALUES (?, ?)`,
-        params: [id, pelicula.getUrlImagen],
+        sql: `INSERT INTO imagen_pelicula (id_pelicula, url_imagen, mimetype) VALUES (?, ?,?)`,
+        params: [id, pelicula.getUrlImagen, pelicula.getMimetype],
       });
     }
 
@@ -171,34 +177,56 @@ class PeliculaEntity {
   }
 
   static async eliminarPelicula(pelicula) {
-    let query = "Update pelicula SET activo = ? WHERE id_pelicula = ?";
-    const [result] = pool.query(query, [false, pelicula.getIdPelicula]);
+    let query = "UPDATE pelicula SET activo = ? WHERE id_pelicula = ?";
+    try {
+      const result = pool.query(query, [false, pelicula.getIdPelicula]);
+
+      if (result.affectedRows <= 0) {
+        const error = new Error("No se pudo eliminar la pelicula");
+        error.status = 400;
+        throw error;
+      }
+      return {
+        success: true,
+        result,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        error,
+      };
+    }
   }
 
   /**
-   * 
-   * @param {{offset: Number, pagina: Number}} configuracion 
+   *
+   * @param {{offset: Number, pagina: Number}} configuracion
    * @returns {{success: Boolean, result: []}}
    */
   static async obtenerPeliculas(configuracion) {
-      console.log("CONFIGURACION: ", configuracion);
+    try {
       let query = "CALL sp_obtener_peliculas(?,?)";
-      const [[peliculas]] = await pool.query(query, [configuracion.limite, configuracion.offset]);
+      const [[peliculas]] = await pool.query(query, [
+        configuracion.limite,
+        configuracion.offset,
+      ]);
       if (!peliculas) {
-        const error = new Error("No se pudo recuperar las peliculas")
+        const error = new Error("No se pudo recuperar las peliculas");
         error.status = 404;
-        return {
-          success: false,
-          error
-        }
+        throw error;
       }
-      console.log(peliculas);
       return {
         success: true,
-        result: peliculas
-      }
-      
-    
+        result: peliculas,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        error,
+      };
+    }
   }
 }
 

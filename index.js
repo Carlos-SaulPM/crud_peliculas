@@ -26,8 +26,7 @@ app.get("/", (req, res) => {
 app.use("/api", peliculaApiRouter);
 
 app.use((error, req, res, next) => {
-  console.error("MIDDLEWARE ERROR:",error);
- res.status(error.status).json({
+ res.status(error.status || 400).json({
    error: {
      mensaje: error.message,
      status: error.status,
