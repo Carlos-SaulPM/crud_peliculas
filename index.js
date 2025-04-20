@@ -8,9 +8,8 @@ const path = require("path");
 const morgan = require("morgan");
 const bodyparser = require("body-parser");
 const fileUpload = require("express-fileupload");
-const fs = require("fs");
 
-const { peliculaApiRouter } = require("./routers");
+const { peliculaApiRouter, peliculaRouter } = require("./routers");
 
 app.use(express.static(path.join(__dirname, "public")));
 app.set("view engine", "ejs");
@@ -19,11 +18,9 @@ app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use(fileUpload());
 
-app.get("/", (req, res) => {
-  res.render("index");
-});
-
+app.use("/imagenes", express.static(path.join(__dirname, "./almacen")))
 app.use("/api", peliculaApiRouter);
+app.use("/", peliculaRouter);
 
 app.use((error, req, res, next) => {
  res.status(error.status || 400).json({

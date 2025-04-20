@@ -2,7 +2,6 @@ const express = require("express");
 const path = require("path");
 const { peliculaRepository } = require("../repositories");
 const { peliculaModel } = require("../models");
-const { error } = require("console");
 const router = express.Router();
 
 const RUTA_ALMACEN = path.join(__dirname, "../almacen");
@@ -19,6 +18,72 @@ const moverArchivo = (file, rutaDestino) => {
     });
   });
 };
+
+//LISTO
+//Obtener peliculas
+router.get("/", async (req, res, next) => {
+  let { pagina = 1, limite = 10, estado = "todos" } = req.query;
+  pagina = Number(pagina);
+  limite = Number(limite);
+  if (
+    (estado !== "todos" && estado !== "visto") ||
+    Number.isNaN(pagina) ||
+    Number.isNaN(limite)
+  ) {
+    const error = new Error("Parametros erroneos");
+    error.status = 400;
+    return next(error);
+  }
+  let offset = Number((pagina - 1) * limite);
+
+  const configuracion = {
+    limite,
+    offset,
+  };
+
+  let respuesta = null;
+  if (estado === "visto") {
+    respuesta = await peliculaRepository.obtenerPeliculasVistas(configuracion);
+  } else {
+    respuesta = await peliculaRepository.obtenerPeliculas(configuracion);
+  }
+  if (!respuesta.success) return next(respuesta.error);
+
+  return res.render("index", { peliculas: respuesta.result });
+});
+
+//FALTA ARREGLAR FORM Y PROBAR
+//PROBAR
+router.get("/pelicula/agregar", (req, res) => {
+  res.render("pelicula/manipularPelicula", {
+    titulo: "Agregar Pelicula",
+    infoVista: { actionForm: "/pelicula/guardar", nombreBoton: "Guardar" },
+    pelicula: null
+  });
+});
+
+//Obtener pelicula
+//Cambiar enlace en la vista
+router.get("/pelicula/:id", async (req, res, next) => {
+  const id_pelicula = Number(req.params.id);
+  const respuesta = await peliculaRepository.obtenerPelicula(
+    new peliculaModel(id_pelicula)
+  );
+  //Checar si ya se ha visto la pelicula en el repository.
+  const peliculaVista = await peliculaRepository.peliculaVista(
+    respuesta.peliculaDb
+  );
+  if (!respuesta.success || !peliculaVista.success) {
+    const error = !respuesta.success ? respuesta.error : peliculaVista.error;
+    error.status = 404;
+    return next(error);
+  }
+  let pelicula = {
+    ...respuesta.peliculaDb.toJSON(),
+    estado_vista: peliculaVista.estado_vista,
+  };
+  res.render("pelicula/vistaPelicula", { pelicula });
+});
 
 //Guardar pelicula
 router.post("/pelicula/guardar", async (req, res, next) => {
@@ -66,6 +131,17 @@ router.post("/pelicula/guardar", async (req, res, next) => {
   }
 
   res.status(201).json({ mensaje: "Película guardada correctamente" });
+});
+
+//Eliminar pelicula
+router.get("/pelicula/eliminar/:id", async (req, res, next) => {
+  const id_pelicula = Number(req.params.id);
+  const result = await peliculaRepository.eliminarPelicula(
+    new peliculaModel(id_pelicula)
+  );
+  if (!result.success) return next(result.error);
+
+  res.status(200).json({ result });
 });
 
 //Modificar pelicula
@@ -120,61 +196,4 @@ router.post("/pelicula/modificar/:id", async (req, res, next) => {
     .catch((error) => next(error));
 });
 
-//Obtener pelicula
-router.get("/pelicula/:id", async (req, res, next) => {
-  const id_pelicula = Number(req.params.id);
-  const respuesta = await peliculaRepository.obtenerPelicula(
-    new peliculaModel(id_pelicula)
-  );
-  if (!respuesta.success) {
-    respuesta.error.status = 404;
-    return next(respuesta.error);
-  }
-  res.status(200).json({ pelicula: respuesta.peliculaDb });
-});
-
-//Obtener peliculas
-router.get("/peliculas", async (req, res, next) => {
-  let { pagina = 1, limite = 10, estado = "todos" } = req.query;
-  pagina = Number(pagina);
-  limite = Number(limite);
-  if (
-    (estado !== "todos" && estado !== "visto") ||
-    Number.isNaN(pagina) ||
-    Number.isNaN(limite)
-  ) {
-    const error = new Error("Parametros erroneos");
-    error.status = 400;
-    return next(error);
-  }
-  let offset = Number((pagina - 1) * limite);
-
-  const configuracion = {
-    limite,
-    offset,
-  };
-
-  let respuesta = null;
-  if (estado === "visto") {
-    respuesta = await peliculaRepository.obtenerPeliculasVistas(configuracion);
-    console.log("VISTO");
-  } else {
-    console.log("TODOS");
-    respuesta = await peliculaRepository.obtenerPeliculas(configuracion);
-  }
-  if (!respuesta.success) return next(respuesta.error);
-
-  res.status(200).json({ peliculas: respuesta.result });
-});
-
-//Eliminar pelicula
-router.get("/pelicula/eliminar/:id", async (req, res, next) => {
-  const id_pelicula = Number(req.params.id);
-  const result = await peliculaRepository.eliminarPelicula(
-    new peliculaModel(id_pelicula)
-  );
-  if (!result.success) return next(result.error);
-
-  res.status(200).json({ result });
-});
 module.exports = router;

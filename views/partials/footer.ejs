@@ -1,24 +1,23 @@
-<html lang="es">
-<script>
+  <script>
     function previewImage(event) {
-      const preview = document.getElementById('previewImagen');
-      const noImageText = document.getElementById('noImageText');
-      const imageContainer = document.getElementById('imageContainer');
+      const preview = document.getElementById("previewImagen");
+      const noImageText = document.getElementById("noImageText");
+      const imageContainer = document.getElementById("imageContainer");
       const file = event.target.files[0];
       const reader = new FileReader();
 
       if (file) {
-        reader.onload = function() {
+        reader.onload = function () {
           preview.src = reader.result;
-          preview.style.display = 'block';
-          noImageText.style.display = 'none';
-          imageContainer.style.backgroundColor = 'transparent'; // Para mostrar la imagen
+          preview.style.display = "block";
+          noImageText.style.display = "none";
+          imageContainer.style.backgroundColor = "transparent"; // Para mostrar la imagen
         };
         reader.readAsDataURL(file);
       } else {
-        preview.style.display = 'none';
-        noImageText.style.display = 'block';
-        imageContainer.style.backgroundColor = '#f9f9f9'; // Fondo por defecto
+        preview.style.display = "none";
+        noImageText.style.display = "block";
+        imageContainer.style.backgroundColor = "#f9f9f9"; // Fondo por defecto
       }
     }
   </script>

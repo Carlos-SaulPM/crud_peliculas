@@ -36,6 +36,15 @@ CREATE TABLE trailer_pelicula (
     CONSTRAINT fk_trailer_pelicula_pelicula FOREIGN KEY (id_pelicula) REFERENCES pelicula (id_pelicula)
 );
 
+CREATE TABLE estado_pelicula(
+  id_estado_pelicula    INT NOT NULL AUTO_INCREMENT,
+  id_pelicula           INT NOT NULL,
+  activo                BIT(1) DEFAULT TRUE,
+  fechaHora             DATETIME DEFAULT NOW(),
+  PRIMARY KEY(id_estado_pelicula),
+  CONSTRAINT fk_estado_pelicula_pelicula FOREIGN KEY(id_pelicula) REFERENCES pelicula(id_pelicula)
+);
+
 DELIMITER//
 
 CREATE PROCEDURE sp_insertar_pelicula(
@@ -117,4 +126,44 @@ BEGIN
   LIMIT p_limit OFFSET p_offset;
 END//
 
+CREATE PROCEDURE sp_obtener_peliculas_vistas (
+    IN p_limit  INT,
+    IN p_offset INT
+)
+BEGIN
+    SELECT 
+        p.id_pelicula, 
+        p.titulo, 
+        p.sinopsis, 
+        ip.id_imagen, 
+        ip.url_imagen, 
+        ip.mimetype, 
+        tp.id_trailer, 
+        tp.url_trailer
+    FROM pelicula p
+    INNER JOIN (
+        SELECT ip1.*
+        FROM imagen_pelicula ip1
+        INNER JOIN (
+            SELECT id_pelicula, MAX(CONCAT(fecha, ' ', hora)) AS max_fecha
+            FROM imagen_pelicula
+            GROUP BY id_pelicula
+        ) ultima_ip ON ip1.id_pelicula = ultima_ip.id_pelicula
+                  AND CONCAT(ip1.fecha, ' ', ip1.hora) = ultima_ip.max_fecha
+    ) ip ON p.id_pelicula = ip.id_pelicula
+    INNER JOIN (
+        SELECT tp1.*
+        FROM trailer_pelicula tp1
+        INNER JOIN (
+            SELECT id_pelicula, MAX(CONCAT(fecha, ' ', hora)) AS max_fecha
+            FROM trailer_pelicula
+            GROUP BY id_pelicula
+        ) ultimo_tp ON tp1.id_pelicula = ultimo_tp.id_pelicula
+                   AND CONCAT(tp1.fecha, ' ', tp1.hora) = ultimo_tp.max_fecha
+    ) tp ON p.id_pelicula = tp.id_pelicula
+    INNER JOIN estado_pelicula ep ON p.id_pelicula = ep.id_pelicula
+    WHERE p.activo = TRUE
+      AND ep.activo = TRUE
+    LIMIT p_limit OFFSET p_offset;
+END //
 DELIMITER;

@@ -1,2 +1,3 @@
 const peliculaApiRouter = require("./peliculaApi_router");
-module.exports = {peliculaApiRouter}
+const peliculaRouter = require("./pelicula_router");
+module.exports = {peliculaApiRouter, peliculaRouter}

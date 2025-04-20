@@ -228,6 +228,64 @@ class PeliculaEntity {
       };
     }
   }
+
+  /**
+   *
+   * @param {{offset: Number, pagina: Number, estado: Boolean}} configuracion
+   * @returns {{success: Boolean, result: []}}
+   */
+  static async obtenerPeliculasVistas(configuracion) {
+    try {
+      let query = "CALL sp_obtener_peliculas_vistas(?,?)";
+      const [[peliculas]] = await pool.query(query, [
+        configuracion.limite,
+        configuracion.offset,
+      ]);
+      if (!peliculas) {
+        const error = new Error("No se pudo recuperar las peliculas");
+        error.status = 404;
+        throw error;
+      }
+      return {
+        success: true,
+        result: peliculas,
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        error,
+      };
+    }
+  }
+
+  /**
+   *
+   * @param {PeliculaModel} pelicula
+   * @returns {{success: Boolean, visto: Boolean}}
+   */
+  static async peliculaVista(pelicula) {
+    try {
+      let query = "SELECT id_estado_pelicula FROM estado_pelicula WHERE id_pelicula = ? AND activo = ?";
+      const result = await pool.query(query, [pelicula.getIdPelicula, true]);
+      if (!result[0]) {
+        throw new Error("Ocurrio un error al recuperar el estado de la pelicula en la base de datos")
+      }
+
+      return {
+        success: true,
+        estado_vista: (result[0].length <= 0) ? false : true
+      }
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        error
+      }
+    }
+    
+
+  }
 }
 
 module.exports = PeliculaEntity;

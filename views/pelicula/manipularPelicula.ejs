@@ -1,14 +1,19 @@
-<%- include('../partials/head', {title}) %>
+<%- include('../partials/head', {titulo}) %>
 <body>
   <div class="container container-custom">
-    <h2 class="mb-4">Agregar Nueva Película</h2>
-    <form action="/pelicula/guardar" method="POST" enctype="multipart/form-data">
+    <h2 class="mb-4"><%= titulo %></h2>
+    <form action="<%= infoVista.actionForm %>" method="POST" enctype="multipart/form-data">
       <div class="row">
         <!-- Columna de imagen -->
         <div class="col-md-4 d-flex flex-column align-items-center">
           <div class="image-container" id="imageContainer">
-            <img src="/images/placeholder.jpg" alt="Previsualización" class="img-fluid" id="previewImagen" style="display:none;">
-            <span id="noImageText">No hay imagen seleccionada</span>
+            <% if (pelicula && pelicula.url_imagen) { %>
+              <img src="<%= pelicula.url_imagen %>" alt="Previsualización" class="img-fluid" id="previewImagen">
+              <span id="noImageText" style="display: none;">No hay imagen seleccionada</span>
+            <% } else { %>
+              <img src="" alt="Previsualización" class="img-fluid" id="previewImagen" style="display: none;">
+              <span id="noImageText">No hay imagen seleccionada</span>
+            <% } %>
           </div>
           <div class="upload-btn">
             <input class="form-control" type="file" id="imagen" name="imagen" accept="image/*" onchange="previewImage(event)">
@@ -19,21 +24,21 @@
         <div class="col-md-8">
           <div class="mb-3">
             <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" required>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="<%= pelicula?.titulo || '' %>" required>
           </div>
           <div class="mb-3">
             <label for="descripcion" class="form-label">Descripción</label>
-            <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required></textarea>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required><%= pelicula?.sinopsis || '' %></textarea>
           </div>
           <div class="mb-3">
             <label for="trailer" class="form-label">URL del trailer</label>
-            <input type="url" class="form-control" id="trailer" name="trailer" placeholder="https://www.youtube.com/watch?v=..." required>
+            <input type="url" class="form-control" id="trailer" name="trailer" placeholder="https://www.youtube.com/watch?v=..." value="<%= pelicula?.url_trailer || '' %>" required>
           </div>
 
           <!-- Botones -->
           <div class="d-flex justify-content-between">
             <a href="/" class="btn btn-link">Atrás</a>
-            <button type="submit" class="btn btn-custom">Guardar</button>
+            <button type="submit" class="btn btn-custom"><%= infoVista.nombreBoton %></button>
           </div>
         </div>
       </div>
@@ -42,5 +47,4 @@
 
   
 </body>
-
 <%- include('../partials/footer') %>

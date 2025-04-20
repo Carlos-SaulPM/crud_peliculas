@@ -1,4 +1,4 @@
-<%- include('partials/head', {title: "Lista Peliculas"}) %>
+<%- include('partials/head', {titulo: "Lista Peliculas"}) %>
 <body>
   <div class="main-wrapper">
     <div class="container-custom">
@@ -7,7 +7,12 @@
         <div class="col-md-8 offset-md-2">
           <form action="/" method="get">
             <div class="input-group">
-              <input name="buscar" class="form-control" placeholder="Buscar..." type="text" />
+              <input
+                name="buscar"
+                class="form-control"
+                placeholder="Buscar..."
+                type="text"
+              />
               <button class="btn btn-outline-secondary" type="submit">
                 <i class="fas fa-search"></i>
               </button>
@@ -17,108 +22,34 @@
       </div>
       <div class="row mb-4">
         <div class="col-md-8 offset-md-2 d-flex align-items-center">
-          <a href="?estado=sin_ver" class="text-decoration-none me-3">
-            <div class="form-check">
-              <input class="form-check-input" id="unwatched" type="checkbox" />
-              <label class="form-check-label" for="unwatched">Sin ver</label>
-            </div>
+          <a href="?estado=visto" class="text-decoration-none me-3">
+           <p>VISTO</p>
           </a>
           <a href="/pelicula/agregar" class="btn btn-custom">Nueva película</a>
         </div>
       </div>
 
       <div class="row justify-content-center g-4">
+        <% peliculas.forEach(pelicula => { %>
         <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
+          <a
+            href="/pelicula/<%= pelicula.id_pelicula %>"
+            class="card movie-card text-decoration-none text-dark"
+          >
+            <img
+              alt="Imagen de la película <%= pelicula.titulo %>"
+              class="card-img-top"
+              src="/imagenes/<%= pelicula.url_imagen.split('/').pop() %>"
+            />
             <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
-            </div>
-          </a>
-        </div>
-        <div class="col-auto">
-          <a href="/pelicula?id=1" class="card movie-card text-decoration-none text-dark">
-            <img alt="Imagen de la película" class="card-img-top"
-              src="https://storage.googleapis.com/a1aa/image/jBsPdKWr8DELjI3I0pdjwrv9bUTzvEkD6uIkLxxKAAc.jpg" />
-            <div class="card-body text-center">
-              <h5 class="card-title fw-bold">Nombre de la película 1</h5>
+              <h5 class="card-title fw-bold">
+                <%= pelicula.titulo%>
+              </h5>
             </div>
           </a>
         </div>
 
+        <% }) %>
       </div>
     </div>
   </div>
