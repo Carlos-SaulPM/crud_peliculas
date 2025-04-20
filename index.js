@@ -18,7 +18,7 @@ app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 app.use(fileUpload());
 
-app.use("/imagenes", express.static(path.join(__dirname, "./almacen")))
+app.use("/almacen", express.static(path.join(__dirname, "./almacen")))
 app.use("/api", peliculaApiRouter);
 app.use("/", peliculaRouter);
 

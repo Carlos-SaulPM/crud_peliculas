@@ -16,23 +16,23 @@
             <% } %>
           </div>
           <div class="upload-btn">
-            <input class="form-control" type="file" id="imagen" name="imagen" accept="image/*" onchange="previewImage(event)">
+            <input class="form-control" type="file" id="imagen" name="portada_pelicula" accept="image/*" onchange="previewImage(event)">
           </div>
         </div>
 
         <!-- Columna de campos -->
         <div class="col-md-8">
           <div class="mb-3">
-            <label for="nombre" class="form-label">Nombre</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" value="<%= pelicula?.titulo || '' %>" required>
+            <label for="titulo" class="form-label">Título de la película</label>
+            <input type="text" class="form-control" id="titulo" name="titulo" value="<%= pelicula?.titulo || '' %>" required>
           </div>
           <div class="mb-3">
-            <label for="descripcion" class="form-label">Descripción</label>
-            <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required><%= pelicula?.sinopsis || '' %></textarea>
+            <label for="sinopsis" class="form-label">Sinopsis</label>
+            <textarea class="form-control" id="sinopsis" name="sinopsis" rows="4" required><%= pelicula?.sinopsis || '' %></textarea>
           </div>
           <div class="mb-3">
-            <label for="trailer" class="form-label">URL del trailer</label>
-            <input type="url" class="form-control" id="trailer" name="trailer" placeholder="https://www.youtube.com/watch?v=..." value="<%= pelicula?.url_trailer || '' %>" required>
+            <label for="url_trailer" class="form-label">URL del trailer</label>
+            <input type="url" class="form-control" id="url_trailer" name="url_trailer" placeholder="https://www.youtube.com/watch?v=..." value="<%= pelicula?.url_trailer || '' %>" required>
           </div>
 
           <!-- Botones -->
