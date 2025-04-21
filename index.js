@@ -23,14 +23,17 @@ app.use("/api", peliculaApiRouter);
 app.use("/", peliculaRouter);
 
 app.use((error, req, res, next) => {
- res.status(error.status || 400).json({
+  let status = error.status || 400;
+ res.render("error", {
    error: {
+     titulo: "Ocurrio un error",
      mensaje: error.message,
-     status: error.status,
+     codigo: status,
    },
  });
+  
 })
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`http://localhost:${PORT}`);
 });

@@ -1,5 +1,6 @@
 const { pool } = require("../config");
 const { peliculaModel } = require("../models");
+const PeliculaModel = require("../models/pelicula_model");
 
 class PeliculaEntity {
   /**
@@ -266,25 +267,74 @@ class PeliculaEntity {
    */
   static async peliculaVista(pelicula) {
     try {
-      let query = "SELECT id_estado_pelicula FROM estado_pelicula WHERE id_pelicula = ? AND activo = ?";
+      let query =
+        "SELECT id_estado_pelicula FROM estado_pelicula WHERE id_pelicula = ? AND activo = ?";
       const result = await pool.query(query, [pelicula.getIdPelicula, true]);
       if (!result[0]) {
-        throw new Error("Ocurrio un error al recuperar el estado de la pelicula en la base de datos")
+        throw new Error(
+          "Ocurrio un error al recuperar el estado de la pelicula en la base de datos"
+        );
       }
 
       return {
         success: true,
-        estado_vista: (result[0].length <= 0) ? false : true
-      }
+        estado_vista: result[0].length <= 0 ? false : true,
+      };
     } catch (error) {
       console.error(error);
       return {
         success: false,
-        error
-      }
+        error,
+      };
     }
-    
+  }
 
+  /**
+   * 
+   * @param {{busqueda: String, limite: Number, offset: Number}} pelicula 
+   */
+  static async buscarPeliculas(datos) {
+    try {
+      let query =
+        "CALL sp_buscar_peliculas(?,?,?)";
+      const result = await pool.query(query, [datos.busqueda, datos.limite, datos.offset]);
+      if (!result[0]) {
+        throw new Error(
+          "Ocurrio un error buscar las peliculas en la base de datos"
+        );
+      }
+
+      return {
+        success: true,
+        result: result[0],
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        error,
+      };
+    }
+  }
+
+  static async contarPeliculas() {
+    try {
+      const [[[{ total }]]] = await pool.query("CALL sp_contar_peliculas()");
+      return { success: true, result: total };
+    } catch (error) {
+      return { success: false, error };
+    }
+  }
+
+  static async contarPeliculasVistas() {
+    try {
+      const [[[{ total }]]] = await pool.query(
+        "CALL sp_contar_peliculas_vistas()"
+      );
+      return { success: true, result: total };
+    } catch (error) {
+      return { success: false, error };
+    }
   }
 }
 

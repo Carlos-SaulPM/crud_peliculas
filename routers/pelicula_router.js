@@ -47,23 +47,34 @@ router.get("/", async (req, res, next) => {
     error.status = 400;
     return next(error);
   }
-  let offset = Number((pagina - 1) * limite);
+  const offset = (pagina - 1) * limite;
 
-  const configuracion = {
-    limite,
-    offset,
-  };
+  const configuracion = { limite, offset };
 
-  let respuesta = null;
-  if (estado === "visto") {
-    respuesta = await peliculaRepository.obtenerPeliculasVistas(configuracion);
-  } else {
-    respuesta = await peliculaRepository.obtenerPeliculas(configuracion);
-  }
+  const [respuesta, conteo] =
+    estado === "visto"
+      ? await Promise.all([
+          peliculaRepository.obtenerPeliculasVistas(configuracion),
+          peliculaRepository.contarPeliculasVistas(),
+        ])
+      : await Promise.all([
+          peliculaRepository.obtenerPeliculas(configuracion),
+          peliculaRepository.contarPeliculas(),
+        ]);
+
   if (!respuesta.success) return next(respuesta.error);
+  if (!conteo.success) return next(conteo.error);
 
-  return res.render("index", { peliculas: respuesta.result });
+  const totalPaginas = Math.ceil(conteo.result / limite);
+
+  return res.render("index", {
+    peliculas: respuesta.result,
+    paginaActual: pagina,
+    totalPaginas,
+    estado,
+  });
 });
+
 
 //AGREGAR - VISTA
 router.get("/pelicula/agregar", (req, res) => { 
@@ -76,7 +87,7 @@ router.get("/pelicula/agregar", (req, res) => {
 
 //GUARDAR
 router.post("/pelicula/guardar", async (req, res, next) => {
-  console.log(req.body);
+  // console.log(req.body);
   const { titulo, sinopsis, url_trailer } = req.body;
   //Verificando si los datos no son nulos
   if (
@@ -108,10 +119,10 @@ router.post("/pelicula/guardar", async (req, res, next) => {
 
   //Almacena la portada de la pelicula.
   const portadaPelicula = req.files.portada_pelicula;
-  const { name: nombreImagen, mimetype } = portadaPelicula;
-  let rutaImagenAlmacen = path.join(RUTA_ALMACEN, nombreImagen);
+  const { name, mimetype } = portadaPelicula;
+  let rutaImagenAlmacen = path.join(RUTA_ALMACEN, name);
   await moverArchivo(portadaPelicula, rutaImagenAlmacen);
-  let rutaImagenURL = `/almacen/${nombreImagen}`;
+  let rutaImagenURL = `/almacen/${name}`;
   //Se registra en el repositorio
   const resultado = await peliculaRepository.subirPelicula(
     peliculaModel.peliculaParaGuardar(
@@ -119,7 +130,7 @@ router.post("/pelicula/guardar", async (req, res, next) => {
       sinopsis,
       rutaImagenURL,
       mimetype,
-      url_trailer
+      embedUrl
     )
   );
 
@@ -151,6 +162,7 @@ router.get("/pelicula/:id", async (req, res, next) => {
     ...respuesta.peliculaDb.toJSON(),
     estado_vista: peliculaVista.estado_vista,
   };
+  // console.log(pelicula);
   res.render("pelicula/vistaPelicula", { pelicula });
 });
 
@@ -158,6 +170,7 @@ router.get("/pelicula/modificar/:id", async (req,res,next) => {
   const id_pelicula = Number(req.params.id);
   const result = await peliculaRepository.obtenerPelicula(new peliculaModel(id_pelicula));
   if (!result.success) return next(result.error);
+  // console.log("MODIFICAR VIEW:",result.peliculaDb.toJSON());
   res.render("pelicula/manipularPelicula", {
     titulo: "Modificar Pelicula",
     infoVista: { actionForm: "/pelicula/modificar", nombreBoton: "Modificar" },
@@ -166,76 +179,66 @@ router.get("/pelicula/modificar/:id", async (req,res,next) => {
 })
 
 
-//FIN_LISTOS
-
-
-
-
 //Modificar pelicula
 router.post("/pelicula/modificar", async (req, res, next) => {
-  const { titulo, sinopsis, id_trailer, url_trailer, id_imagen } = req.body;
-  const id_pelicula = Number(req.params.id);
-
-  if (
-    !titulo ||
-    !sinopsis ||
-    !url_trailer ||
-    !req.files.portada_pelicula ||
-    !id_pelicula ||
-    Array.isArray(req.files.portada_pelicula)
-  ) {
-    const error = new Error(
-      Array.isArray(req.files.portada_pelicula)
-        ? "Solo se permite una imagen"
-        : "Faltaron datos para procesar su solicitud"
-    );
-    error.status = 400;
-    if (!req.files.portada_pelicula) {
-      error.message = "No subio la portada de la pelicula";
-    }
-    return next(error);
-  }
-  const portadaPelicula = req.files.portada_pelicula;
-  const { name: nombreImagen, mimetype } = portadaPelicula;
-  let rutaImagenAlmacen = path.join(RUTA_ALMACEN, nombreImagen);
-
-  const resultado = await peliculaRepository.modificarPelicula(
-    new peliculaModel(
+  try {
+    const {
       id_pelicula,
       titulo,
       sinopsis,
-      Number(id_imagen),
-      rutaImagenAlmacen,
-      mimetype,
-      Number(id_trailer),
-      url_trailer
-    )
-  );
+      id_trailer,
+      url_trailer,
+      id_imagen,
+    } = req.body;
+    const archivoImagen = req.files?.portada_pelicula;
 
-  if (!resultado.success) return next(resultado.error);
+    if (!titulo || !sinopsis || !url_trailer || !id_pelicula) {
+      const error = new Error("Faltaron datos para procesar su solicitud");
+      error.status = 400;
+      return next(error);
+    }
 
-  await moverArchivo(portadaPelicula, rutaImagenAlmacen)
-    .then(() => {
-      res
-        .status(200)
-        .json({ mensaje: "Datos actualizados", resultado: resultado.result });
-    })
-    .catch((error) => next(error));
+    let rutaImagenURL = null;
+    let mimetype = null;
+
+    if (archivoImagen) {
+      if (Array.isArray(archivoImagen)) {
+        const error = new Error("Solo se permite una imagen");
+        error.status = 400;
+        return next(error);
+      }
+
+      const { name: nombreImagen, mimetype: tipo } = archivoImagen;
+      const rutaAlmacen = path.join(RUTA_ALMACEN, nombreImagen);
+      rutaImagenURL = `/almacen/${nombreImagen}`;
+      mimetype = tipo;
+
+      await moverArchivo(archivoImagen, rutaAlmacen);
+    }
+
+    const resultado = await peliculaRepository.modificarPelicula(
+      new peliculaModel(
+        Number(id_pelicula),
+        titulo,
+        sinopsis,
+        Number(id_imagen),
+        rutaImagenURL, // Puede ser null si no se actualiza imagen
+        mimetype, // Puede ser null también
+        Number(id_trailer),
+        url_trailer
+      )
+    );
+
+    if (!resultado.success) return next(resultado.error);
+
+    res
+      .redirect("/");
+  } catch (error) {
+    next(error);
+  }
 });
 
-
-
-//Eliminar pelicula
-router.get("/pelicula/eliminar/:id", async (req, res, next) => {
-  const id_pelicula = Number(req.params.id);
-  const result = await peliculaRepository.eliminarPelicula(
-    new peliculaModel(id_pelicula)
-  );
-  if (!result.success) return next(result.error);
-
-  res.status(200).json({ result });
-});
-
+//FIN_LISTOS
 
 
 

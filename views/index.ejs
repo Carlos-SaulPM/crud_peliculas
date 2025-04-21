@@ -51,6 +51,25 @@
 
         <% }) %>
       </div>
+      <!-- Paginación -->
+      <div class="row mt-4">
+        <div class="col text-center">
+          <nav aria-label="Paginación de películas">
+            <ul class="pagination justify-content-center">
+
+              <% for (let i = 1; i <= totalPaginas; i++) { %>
+                <li class="page-item <%= i === paginaActual ? 'active' : '' %>">
+                  <a class="page-link" href="?pagina=<%= i %><%= estado !== 'todos' ? '&estado=' + estado : '' %>">
+                    <%= i %>
+                  </a>
+                </li>
+              <% } %>
+
+            </ul>
+          </nav>
+        </div>
+      </div>
+
     </div>
   </div>
 </body>

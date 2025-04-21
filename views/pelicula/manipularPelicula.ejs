@@ -42,6 +42,12 @@
           </div>
         </div>
       </div>
+      <% if (pelicula) { %>
+        <input type="hidden" name="id_trailer" value="<%= pelicula.id_trailer %>">
+        <input type="hidden" name="id_imagen" value="<%= pelicula.id_imagen %>">
+        <input type="hidden" name="id_pelicula" value="<%= pelicula.id_pelicula %>">
+        
+      <% } %>
     </form>
   </div>
 
