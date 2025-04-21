@@ -4,7 +4,6 @@
 
 1. Mejorar las vistas
     - Cambiar los enlaces por botones
-1. Falta probar la api corregida en postman.
 
 ## NOTAS:
 1. Para simular que el servidor de almacenamiento esta en la nube se hizo estatica la carpeta almacen.

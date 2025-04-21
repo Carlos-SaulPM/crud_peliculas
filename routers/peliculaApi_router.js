@@ -92,7 +92,6 @@ router.get("/peliculas", async (req, res, next) => {
 
 //Guardar pelicula
 router.post("/pelicula/guardar", async (req, res, next) => {
-  // console.log(req.body);
   const { titulo, sinopsis, url_trailer } = req.body;
   //Verificando si los datos no son nulos
   if (
@@ -144,27 +143,18 @@ router.post("/pelicula/guardar", async (req, res, next) => {
     return next(resultado.error);
   }
 
-  res
-    .status(201)
-    .json({
-      mensaje: "Película guardada correctamente",
-      pelicula: resultado.pelicula,
-    });
+  res.status(201).json({
+    mensaje: "Película guardada correctamente",
+    pelicula: resultado.pelicula,
+  });
 });
 
 //Modificar pelicula
 router.post("/pelicula/modificar/:id", async (req, res, next) => {
   try {
-    const {
-      id_pelicula,
-      titulo,
-      sinopsis,
-      id_trailer,
-      url_trailer,
-      id_imagen,
-    } = req.body;
+    const id_pelicula = Number(req.params.id);
+    const { titulo, sinopsis, id_trailer, url_trailer, id_imagen } = req.body;
     const archivoImagen = req.files?.portada_pelicula;
-
     if (!titulo || !sinopsis || !url_trailer || !id_pelicula) {
       const error = new Error("Faltaron datos para procesar su solicitud");
       error.status = 400;
