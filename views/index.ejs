@@ -8,7 +8,7 @@
           <form action="/" method="get">
             <div class="input-group">
               <input
-                name="buscar"
+                name="busqueda"
                 class="form-control"
                 placeholder="Buscar..."
                 type="text"
@@ -22,8 +22,13 @@
       </div>
       <div class="row mb-4">
         <div class="col-md-8 offset-md-2 d-flex align-items-center">
-          <a href="?estado=visto" class="text-decoration-none me-3">
-           <p>VISTO</p>
+          <a href="/?estado=<%= (estado === "todos") ? "visto": (estado==="visto") ? "todos": ""%>" class="text-decoration-none me-3">
+           <p><% if (estado==="todos") { %>
+            VISTOS
+           <% } else { %>
+            VER TODOS
+            <% } %>
+          </p>
           </a>
           <a href="/pelicula/agregar" class="btn btn-custom">Nueva película</a>
         </div>

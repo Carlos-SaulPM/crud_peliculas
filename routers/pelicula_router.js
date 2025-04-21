@@ -29,13 +29,17 @@ const convertirYoutubeEmbed = (url) => {
 
   const videoId = match[1];
   return `https://www.youtube.com/embed/${videoId}`;
-}
-
+};
 
 //LISTOS
 //Obtener peliculas
 router.get("/", async (req, res, next) => {
-  let { pagina = 1, limite = 10, estado = "todos" } = req.query;
+  let {
+    pagina = 1,
+    limite = 10,
+    estado = "todos",
+    busqueda = null,
+  } = req.query;
   pagina = Number(pagina);
   limite = Number(limite);
   if (
@@ -48,24 +52,35 @@ router.get("/", async (req, res, next) => {
     return next(error);
   }
   const offset = (pagina - 1) * limite;
-
   const configuracion = { limite, offset };
 
-  const [respuesta, conteo] =
+  const esBusqueda = busqueda !== null;
+  if (esBusqueda) configuracion.busqueda = busqueda;
+
+  const obtenerPeliculas = esBusqueda
+    ? estado === "visto"
+      ? peliculaRepository.buscarPeliculasVistas
+      : peliculaRepository.buscarPeliculas
+    : estado === "visto"
+    ? peliculaRepository.obtenerPeliculasVistas
+    : peliculaRepository.obtenerPeliculas;
+
+  const contarPeliculas =
     estado === "visto"
-      ? await Promise.all([
-          peliculaRepository.obtenerPeliculasVistas(configuracion),
-          peliculaRepository.contarPeliculasVistas(),
-        ])
-      : await Promise.all([
-          peliculaRepository.obtenerPeliculas(configuracion),
-          peliculaRepository.contarPeliculas(),
-        ]);
+      ? peliculaRepository.contarPeliculasVistas
+      : peliculaRepository.contarPeliculas;
+
+  let [respuesta, conteo] = await Promise.all([
+    obtenerPeliculas(configuracion),
+    contarPeliculas(),
+  ]);
 
   if (!respuesta.success) return next(respuesta.error);
   if (!conteo.success) return next(conteo.error);
 
-  const totalPaginas = Math.ceil(conteo.result / limite);
+  conteo = esBusqueda ? respuesta.result.length : conteo.result;
+
+  const totalPaginas = Math.ceil(conteo / limite);
 
   return res.render("index", {
     peliculas: respuesta.result,
@@ -75,13 +90,12 @@ router.get("/", async (req, res, next) => {
   });
 });
 
-
 //AGREGAR - VISTA
-router.get("/pelicula/agregar", (req, res) => { 
+router.get("/pelicula/agregar", (req, res) => {
   res.render("pelicula/manipularPelicula", {
     titulo: "Agregar Pelicula",
     infoVista: { actionForm: "/pelicula/guardar", nombreBoton: "Guardar" },
-    pelicula: null
+    pelicula: null,
   });
 });
 
@@ -142,14 +156,13 @@ router.post("/pelicula/guardar", async (req, res, next) => {
   res.redirect("/");
 });
 
-
 //OBTENER - VISTA
 router.get("/pelicula/:id", async (req, res, next) => {
   const id_pelicula = Number(req.params.id);
   const respuesta = await peliculaRepository.obtenerPelicula(
     new peliculaModel(id_pelicula)
   );
-  
+
   const peliculaVista = await peliculaRepository.peliculaVista(
     respuesta.peliculaDb
   );
@@ -166,9 +179,12 @@ router.get("/pelicula/:id", async (req, res, next) => {
   res.render("pelicula/vistaPelicula", { pelicula });
 });
 
-router.get("/pelicula/modificar/:id", async (req,res,next) => {
+//MODIFICAR - VISTA
+router.get("/pelicula/modificar/:id", async (req, res, next) => {
   const id_pelicula = Number(req.params.id);
-  const result = await peliculaRepository.obtenerPelicula(new peliculaModel(id_pelicula));
+  const result = await peliculaRepository.obtenerPelicula(
+    new peliculaModel(id_pelicula)
+  );
   if (!result.success) return next(result.error);
   // console.log("MODIFICAR VIEW:",result.peliculaDb.toJSON());
   res.render("pelicula/manipularPelicula", {
@@ -176,8 +192,7 @@ router.get("/pelicula/modificar/:id", async (req,res,next) => {
     infoVista: { actionForm: "/pelicula/modificar", nombreBoton: "Modificar" },
     pelicula: result.peliculaDb.toJSON(),
   });
-})
-
+});
 
 //Modificar pelicula
 router.post("/pelicula/modificar", async (req, res, next) => {
@@ -231,17 +246,11 @@ router.post("/pelicula/modificar", async (req, res, next) => {
 
     if (!resultado.success) return next(resultado.error);
 
-    res
-      .redirect("/");
+    res.redirect("/");
   } catch (error) {
     next(error);
   }
 });
-
-//FIN_LISTOS
-
-
-
 
 
 module.exports = router;

@@ -290,19 +290,49 @@ class PeliculaEntity {
   }
 
   /**
-   * 
-   * @param {{busqueda: String, limite: Number, offset: Number}} pelicula 
+   *
+   * @param {{busqueda: String, limite: Number, offset: Number}} pelicula
    */
-  static async buscarPeliculas(datos) {
+  static async buscarPeliculas(configuracion) {
     try {
-      let query =
-        "CALL sp_buscar_peliculas(?,?,?)";
-      const result = await pool.query(query, [datos.busqueda, datos.limite, datos.offset]);
+      let query = "CALL sp_buscar_peliculas(?,?,?)";
+      const [result] = await pool.query(query, [
+        configuracion.busqueda,
+        configuracion.limite,
+        configuracion.offset,
+      ]);
       if (!result[0]) {
         throw new Error(
           "Ocurrio un error buscar las peliculas en la base de datos"
         );
       }
+      return {
+        success: true,
+        result: result[0],
+      };
+    } catch (error) {
+      console.error(error);
+      return {
+        success: false,
+        error,
+      };
+    }
+  }
+
+  static async buscarPeliculasVistas(configuracion) {
+    try {
+      let query = "CALL sp_buscar_peliculas_vistas(?,?,?)";
+      const [result] = await pool.query(query, [
+        configuracion.busqueda,
+        configuracion.limite,
+        configuracion.offset,
+      ]);
+      if (!result[0]) {
+        throw new Error(
+          "Ocurrio un error buscar las peliculas en la base de datos"
+        );
+      }
+      console.log("BUSCAR PELICULAS VISTAS RP:", result);
 
       return {
         success: true,

@@ -2,9 +2,10 @@
 
 ## LO QUE FALTA CORREGIR
 
-### Rutas de la vista peliculas
+1. Mejorar las vistas
+    - Cambiar los enlaces por botones
+1. Falta corregir la api.
 
-1. Ruta `/pelicula/agregar`
-  Falta arreglar el formulario, enlazar correctamente los inputs.
-1. Ruta `/pelicula/:id`
-  Cambiar el enlace de "Visto" o "Sin ver" a checkbox
+## NOTAS:
+1. Para simular que el servidor de almacenamiento esta en la nube se hizo estatica la carpeta almacen.
+    - Solo se tendria que modificar la ruta _guardar_ para guardar la ruta al servidor que almacenara los archivos.
