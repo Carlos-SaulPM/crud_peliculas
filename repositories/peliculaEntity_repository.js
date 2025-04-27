@@ -65,12 +65,14 @@ class PeliculaEntity {
    * @param {PeliculaModel} pelicula
    * @returns {{success: Boolean, result: {status: String, cambios: [{key: String, valorViejo: String, valorNuevo: String}]}}}
    */
-
+  //PENDIENTE
   static async modificarPelicula(pelicula) {
     let peliculaEncontrada = await this.obtenerPelicula(pelicula);
     if (!peliculaEncontrada.success) throw peliculaEncontrada.error;
 
     peliculaEncontrada = peliculaEncontrada.peliculaDb;
+    let peliculaEncontradaJSON = peliculaEncontrada.toJSON();
+    console.log("PELI encontrada:",peliculaEncontradaJSON);
     if (
       !peliculaEncontrada ||
       Object.values(peliculaEncontrada.toJSON()).length <= 1
@@ -81,100 +83,42 @@ class PeliculaEntity {
       error.status(404);
       throw error;
     }
-
-    const valoresNuevos = pelicula.toJSON();
-    const valoresViejos = peliculaEncontrada.toJSON();
-
-    const propiedadesQuePuedenCambiar = [
-      "titulo",
-      "sinopsis",
-      "url_imagen",
-      "url_trailer",
-      "mimetype",
-    ];
-    const propiedadesACambiar = [];
-    const detallesDeCambio = [];
-
-    for (const key of propiedadesQuePuedenCambiar) {
-      if (
-        valoresNuevos[key] !== undefined &&
-        valoresNuevos[key] !== null &&
-        valoresNuevos[key] !== valoresViejos[key]
-      ) {
-        propiedadesACambiar.push(key);
-        detallesDeCambio.push({
-          propiedad: key,
-          viejo: valoresViejos[key],
-          nuevo: valoresNuevos[key],
-        });
+    let detallesDeCambio = []
+    let peliculaJSON = pelicula.toJSON();
+    for (const [key, value] of Object.entries(peliculaEncontradaJSON)) {
+      // console.log("Llave",key);
+      // console.log("PE",peliculaEncontradaJSON[key],"PM\n", pelicula[key]);
+      if (peliculaEncontradaJSON[key] !== peliculaJSON[key] && peliculaJSON[key]!== null) {
+        detallesDeCambio.push(key);
       }
     }
-
-    const queries = [];
-    const id = pelicula.getIdPelicula;
-
-    if (
-      propiedadesACambiar.includes("titulo") ||
-      propiedadesACambiar.includes("sinopsis")
-    ) {
-      const campos = [];
-      const valores = [];
-
-      if (propiedadesACambiar.includes("titulo")) {
-        campos.push("titulo = ?");
-        valores.push(pelicula.getTitulo);
-      }
-
-      if (propiedadesACambiar.includes("sinopsis")) {
-        campos.push("sinopsis = ?");
-        valores.push(pelicula.getSinopsis);
-      }
-
-      queries.push({
-        sql: `UPDATE pelicula SET ${campos.join(", ")} WHERE id_pelicula = ?`,
-        params: [...valores, id],
-      });
+    // console.log("CAMBIOS: ", detallesDeCambio);
+    let queryPelicula =
+      "UPDATE pelicula SET titulo = ?, sinopsis = ? WHERE id_pelicula =?";
+    let queryImagenPelicula = "";
+    let queryTrailerPelicula = "";
+    if (detallesDeCambio.includes("url_imagen")) {
+      queryImagenPelicula = "UPDATE imagen_pelicula SET url_imagen = ?, mimetype=? WHERE id_imagen = ?"
+      await pool.query(queryImagenPelicula, [pelicula.getUrlImagen, pelicula.getMimetype, pelicula.getIdImagen]);
     }
 
-    if (propiedadesACambiar.includes("url_imagen")) {
-      queries.push({
-        sql: `INSERT INTO imagen_pelicula (id_pelicula, url_imagen, mimetype) VALUES (?, ?,?)`,
-        params: [id, pelicula.getUrlImagen, pelicula.getMimetype],
-      });
+    if (detallesDeCambio.includes("url_trailer")) {
+      queryTrailerPelicula =
+        "UPDATE trailer_pelicula SET url_trailer = ?, fecha = CURRENT_TIMESTAMP WHERE id_trailer = ?";
+      await pool.query(queryTrailerPelicula, [
+        pelicula.getUrlTrailer,
+        pelicula.getIdTrailer,
+      ]);
     }
+    await pool.query(queryPelicula, [pelicula.getTitulo, pelicula.getSinopsis, pelicula.getIdPelicula]);
 
-    if (propiedadesACambiar.includes("url_trailer")) {
-      queries.push({
-        sql: `INSERT INTO trailer_pelicula (id_pelicula, url_trailer) VALUES (?, ?)`,
-        params: [id, pelicula.getUrlTrailer],
-      });
-    }
-
-    //Transaccion de queries, sirve para hacer un rollback
-    const connection = await pool.getConnection();
-    try {
-      await connection.beginTransaction();
-
-      for (const { sql, params } of queries) {
-        await connection.query(sql, params);
-      }
-
-      await connection.commit();
-
-      return {
-        success: true,
-        result: {
-          status: "Película modificada correctamente",
-          cambios: detallesDeCambio,
-        },
-      };
-    } catch (error) {
-      await connection.rollback();
-      console.error("Error en la modificación:", error);
-      return { success: false, error };
-    } finally {
-      connection.release();
-    }
+    return {
+      success: true,
+      result: {
+        status: "Película modificada correctamente",
+        cambios: detallesDeCambio,
+      },
+    };
   }
 
   static async eliminarPelicula(pelicula) {
@@ -268,8 +212,8 @@ class PeliculaEntity {
   static async peliculaVista(pelicula) {
     try {
       let query =
-        "SELECT id_estado_pelicula FROM estado_pelicula WHERE id_pelicula = ? AND activo = ?";
-      const result = await pool.query(query, [pelicula.getIdPelicula, true]);
+        "SELECT id_pelicula FROM pelicula WHERE id_pelicula = ? AND visto=? AND activo = ?";
+      const result = await pool.query(query, [pelicula.getIdPelicula, true, true]);
       if (!result[0]) {
         throw new Error(
           "Ocurrio un error al recuperar el estado de la pelicula en la base de datos"
