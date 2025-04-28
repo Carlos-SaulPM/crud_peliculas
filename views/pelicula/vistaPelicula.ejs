@@ -5,8 +5,8 @@
     <div class="row">
       <div class="col-md-4 mb-4">
         <div class="card movie-card shadow text-center">
-          <img src="/almacen/<%=pelicula.url_imagen.split('/').pop()%>" class="card-img-top" alt="Tellma">
-          <a href="/pelicula/visto/<%= pelicula.id_pelicula%>" ><p><%= (pelicula.estado_vista==="true")? "VISTO" : "SIN VER" %></p></a>
+          <img src="/almacen/<%=pelicula.url_imagen.split('/').pop()%>" class="card-img-top" alt="Tellma"><p><b>Marcar como:</b></p>
+          <a href="/pelicula/visto/<%= pelicula.id_pelicula%>" ><p><%= (pelicula.estado_vista===true)? "SIN VER" : "VISTO" %></p></a>
         </div>
       </div>
 

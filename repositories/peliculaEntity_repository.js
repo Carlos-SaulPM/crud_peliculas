@@ -65,14 +65,13 @@ class PeliculaEntity {
    * @param {PeliculaModel} pelicula
    * @returns {{success: Boolean, result: {status: String, cambios: [{key: String, valorViejo: String, valorNuevo: String}]}}}
    */
-  //PENDIENTE
   static async modificarPelicula(pelicula) {
     let peliculaEncontrada = await this.obtenerPelicula(pelicula);
     if (!peliculaEncontrada.success) throw peliculaEncontrada.error;
 
     peliculaEncontrada = peliculaEncontrada.peliculaDb;
     let peliculaEncontradaJSON = peliculaEncontrada.toJSON();
-    console.log("PELI encontrada:",peliculaEncontradaJSON);
+    console.log("PELI encontrada:", peliculaEncontradaJSON);
     if (
       !peliculaEncontrada ||
       Object.values(peliculaEncontrada.toJSON()).length <= 1
@@ -83,12 +82,15 @@ class PeliculaEntity {
       error.status(404);
       throw error;
     }
-    let detallesDeCambio = []
+    let detallesDeCambio = [];
     let peliculaJSON = pelicula.toJSON();
     for (const [key, value] of Object.entries(peliculaEncontradaJSON)) {
       // console.log("Llave",key);
       // console.log("PE",peliculaEncontradaJSON[key],"PM\n", pelicula[key]);
-      if (peliculaEncontradaJSON[key] !== peliculaJSON[key] && peliculaJSON[key]!== null) {
+      if (
+        peliculaEncontradaJSON[key] !== peliculaJSON[key] &&
+        peliculaJSON[key] !== null
+      ) {
         detallesDeCambio.push(key);
       }
     }
@@ -98,8 +100,13 @@ class PeliculaEntity {
     let queryImagenPelicula = "";
     let queryTrailerPelicula = "";
     if (detallesDeCambio.includes("url_imagen")) {
-      queryImagenPelicula = "UPDATE imagen_pelicula SET url_imagen = ?, mimetype=? WHERE id_imagen = ?"
-      await pool.query(queryImagenPelicula, [pelicula.getUrlImagen, pelicula.getMimetype, pelicula.getIdImagen]);
+      queryImagenPelicula =
+        "UPDATE imagen_pelicula SET url_imagen = ?, mimetype=? WHERE id_imagen = ?";
+      await pool.query(queryImagenPelicula, [
+        pelicula.getUrlImagen,
+        pelicula.getMimetype,
+        pelicula.getIdImagen,
+      ]);
     }
 
     if (detallesDeCambio.includes("url_trailer")) {
@@ -110,7 +117,11 @@ class PeliculaEntity {
         pelicula.getIdTrailer,
       ]);
     }
-    await pool.query(queryPelicula, [pelicula.getTitulo, pelicula.getSinopsis, pelicula.getIdPelicula]);
+    await pool.query(queryPelicula, [
+      pelicula.getTitulo,
+      pelicula.getSinopsis,
+      pelicula.getIdPelicula,
+    ]);
 
     return {
       success: true,
@@ -207,13 +218,17 @@ class PeliculaEntity {
   /**
    *
    * @param {PeliculaModel} pelicula
-   * @returns {{success: Boolean, visto: Boolean}}
+   * @returns {{success: Boolean, estado_vista: Boolean}}
    */
   static async peliculaVista(pelicula) {
     try {
       let query =
-        "SELECT id_pelicula FROM pelicula WHERE id_pelicula = ? AND visto=? AND activo = ?";
-      const result = await pool.query(query, [pelicula.getIdPelicula, true, true]);
+        "SELECT visto FROM pelicula WHERE id_pelicula = ? AND visto=? AND activo = ?";
+      const result = await pool.query(query, [
+        pelicula.getIdPelicula,
+        true,
+        true,
+      ]);
       if (!result[0]) {
         throw new Error(
           "Ocurrio un error al recuperar el estado de la pelicula en la base de datos"
@@ -309,6 +324,32 @@ class PeliculaEntity {
     } catch (error) {
       return { success: false, error };
     }
+  }
+
+  /**
+   *
+   * @param {PeliculaModel} pelicula
+   *  @returns {{success: Boolean, result: {status: String, cambios: [{key: String, valorViejo: String, valorNuevo: String}]}}}
+   */
+  static async marcarPeliculaVista(pelicula) {
+    let queryVerificarEstadoPelicula =
+      "SELECT visto FROM pelicula WHERE id_pelicula = ?";
+    let [result] = await pool.query(queryVerificarEstadoPelicula, [
+      pelicula.getIdPelicula,
+    ]);
+    // console.log("RESULTT",result[0].visto);
+    let visto = result[0].visto === 1 ? false : true;
+    let queryMarcarPeliculaVista =
+      "UPDATE pelicula SET visto = ? WHERE id_pelicula=?";
+    result = await pool.query(queryMarcarPeliculaVista, [
+      visto,
+      pelicula.getIdPelicula,
+    ]);
+
+    return {
+      success: true,
+      result,
+    };
   }
 }
 

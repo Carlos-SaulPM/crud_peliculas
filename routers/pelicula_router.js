@@ -56,14 +56,13 @@ router.get("/", async (req, res, next) => {
 
   const esBusqueda = busqueda !== null;
   if (esBusqueda) configuracion.busqueda = busqueda;
-
   const obtenerPeliculas = esBusqueda
     ? estado === "visto"
       ? peliculaRepository.buscarPeliculasVistas
       : peliculaRepository.buscarPeliculas
     : estado === "visto"
-    ? peliculaRepository.obtenerPeliculasVistas
-    : peliculaRepository.obtenerPeliculas;
+      ? peliculaRepository.obtenerPeliculasVistas
+      : peliculaRepository.obtenerPeliculas;
 
   const contarPeliculas =
     estado === "visto"
@@ -101,7 +100,6 @@ router.get("/pelicula/agregar", (req, res) => {
 
 //GUARDAR
 router.post("/pelicula/guardar", async (req, res, next) => {
-  // console.log(req.body);
   const { titulo, sinopsis, url_trailer } = req.body;
   //Verificando si los datos no son nulos
   if (
@@ -175,7 +173,7 @@ router.get("/pelicula/:id", async (req, res, next) => {
     ...respuesta.peliculaDb.toJSON(),
     estado_vista: peliculaVista.estado_vista,
   };
-  // console.log(pelicula);
+  
   res.render("pelicula/vistaPelicula", { pelicula });
 });
 
@@ -186,7 +184,6 @@ router.get("/pelicula/modificar/:id", async (req, res, next) => {
     new peliculaModel(id_pelicula)
   );
   if (!result.success) return next(result.error);
-  // console.log("MODIFICAR VIEW:",result.peliculaDb.toJSON());
   res.render("pelicula/manipularPelicula", {
     titulo: "Modificar Pelicula",
     infoVista: { actionForm: "/pelicula/modificar", nombreBoton: "Modificar" },
@@ -252,5 +249,11 @@ router.post("/pelicula/modificar", async (req, res, next) => {
   }
 });
 
+
+router.get("/pelicula/visto/:id", async (req, res, next) => {
+  const id = Number(req.params.id);
+  await peliculaRepository.marcarPeliculaVista(new peliculaModel(id));
+  res.redirect("/");
+});
 
 module.exports = router;

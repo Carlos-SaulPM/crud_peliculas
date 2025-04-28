@@ -56,6 +56,7 @@ router.get("/peliculas", async (req, res, next) => {
 
   const esBusqueda = busqueda !== null;
   if (esBusqueda) configuracion.busqueda = busqueda;
+  console.log("ESTADO", estado);
 
   const obtenerPeliculas = esBusqueda
     ? estado === "visto"

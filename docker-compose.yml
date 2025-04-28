@@ -1,4 +1,3 @@
-version: "3.9"
 services:
   node_peliculas:
     build: .
@@ -16,4 +15,4 @@ services:
     environment:
       - MARIADB_ROOT_PASSWORD=12345
     volumes:
-      - ./queryDb:/docker-entrypoint-initdb.d 
+      - ./queryDb/dumpDb:/docker-entrypoint-initdb.d 

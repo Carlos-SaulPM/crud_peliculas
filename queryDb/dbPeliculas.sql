@@ -6,8 +6,8 @@ USE dbPeliculas;
 
 CREATE TABLE pelicula (
     id_pelicula INT NOT NULL AUTO_INCREMENT,
-    titulo VARCHAR(100) NOT NULL UNIQUE,
-    sinopsis VARCHAR(150) NOT NULL,
+    titulo VARCHAR(150) NOT NULL UNIQUE,
+    sinopsis VARCHAR(300) NOT NULL,
     visto BOOLEAN NOT NULL DEFAULT FALSE,
     activo BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (id_pelicula)
@@ -137,8 +137,8 @@ END$$
 
 -- LISTO
 CREATE PROCEDURE `sp_insertar_pelicula`(
-    IN p_titulo VARCHAR(100),
-    IN p_sinopsis VARCHAR(150),
+    IN p_titulo VARCHAR(150),
+    IN p_sinopsis VARCHAR(300),
     IN p_url_imagen VARCHAR(150),
     IN p_mimetype VARCHAR(30),
     IN p_url_trailer VARCHAR(150)
